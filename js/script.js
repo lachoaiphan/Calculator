@@ -86,8 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (operator.length === 0 || curValues.length === 0) return;
         if (equals === true) operator = emptyString; 
 
-        let num1 = parseInt(curValue);
-        let num2 = parseInt(curValues.pop());
+        let num1 = parseInt(curValues.pop());
+        let num2 = parseInt(curValue);
+
 
         curValue = (num1 + num2).toString();
         renderDisplay();
@@ -97,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (operator.length === 0 || curValues.length === 0) return;
         if (equals === true) operator = emptyString; 
 
-        let num1 = parseInt(curValue);
-        let num2 = parseInt(curValues.pop());
+        let num1 = parseInt(curValues.pop());
+        let num2 = parseInt(curValue);
 
         curValue = (num1 - num2).toString();
         renderDisplay();
@@ -108,8 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (operator.length === 0 || curValues.length === 0) return;
         if (equals === true) operator = emptyString; 
 
-        let num1 = parseInt(curValue);
-        let num2 = parseInt(curValues.pop());
+        let num1 = parseInt(curValues.pop());
+        let num2 = parseInt(curValue);
+
 
         curValue = (num1 * num2).toString();
         renderDisplay();
