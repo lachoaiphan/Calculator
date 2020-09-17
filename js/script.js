@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 calBtn.addEventListener('click', () => {
                     equals = true;
                     operate();
+                    equals = false;
                 });
             else
                 calBtn.addEventListener('click', miscBtnFunc[miscBtnIndex++]);
@@ -148,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function operate() {
+        if (prevNum === emptyString)
+            return;
         const num1 = parseNumber(prevNum);
         const num2 = parseNumber(curNum);
         switch (op) {
@@ -167,10 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDisplay();
         startNewNum = true;
         prevNum = emptyString;
-        if (equals === true) {
+        if (equals === true)
             op = emptyString;
-            equals = false;
-        }
     }
 
     // Delete functions 
