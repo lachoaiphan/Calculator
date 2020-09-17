@@ -1,164 +1,193 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const divByZeroMsg = 'Infinity';
+    const negSign = '-';
+    const decimalPoint = '.';
     const emptyString = '';
-    const zeroDigit = '0';
-    const divideByZero = 'no';
-    let calculatorGrid = document.querySelector('.cal-grid');
+    const zeroDigit = '0'; 
+    const percent = 100;
+    let calGrid = document.querySelector('.cal-grid');
     let display = document.querySelector('.display');
-    let curValues = [];
-    let curValue = zeroDigit;
-    let operator = emptyString;
+    let prevNum = emptyString;
+    let curNum = zeroDigit;
+    let op = emptyString;
     let equals = false;
-    let startOver = false;
+    let startNewNum = false;
+
+    // Render Functions
 
     function renderCal() {
-        renderDisplay()
+        renderDisplay();
         renderGrid();
     }
 
     function renderDisplay() {
-        display.textContent = curValue;
+        display.textContent = curNum;
     }
 
     function renderGrid() {
-        /*
-        for (let curDigit = 9; curDigit >= 0; curDigit--) {
-            let digitButton = document.createElement('button');
-            digitButton.classList.add('cal-btn');
-            digitButton.textContent = curDigit;
-            calculatorGrid.appendChild(digitButton);
-        }
-        */
-        let btnGrid = ['AC', 'C', '%', '/',
-                          '9', '8', '7', '*',
-                          '6', '5', '4', '-',
-                          '3', '2', '1', '+',
-                          '0', '.', '+/-', '='];
-        let btnFunctions = [];
-        let btnFuncIndex = 0;
+        const btnGrid = ['AC', 'C', '%', '/',
+                         '9', '8', '7', '*',
+                         '6', '5', '4', '-',
+                         '3', '2', '1', '+',
+                         '0', '.', '+/-', '='];
+        const miscBtnFunc = [clearAll, clearEntry, percentage, 
+                             setPoint, setNeg];
+        let miscBtnIndex = 0;
         for (let i = 0; i < btnGrid.length; i++) {
             let calBtn = document.createElement('button');
             calBtn.classList.add('cal-btn');
             calBtn.textContent = btnGrid[i];
 
-            if (btnGrid[i].charAt(0) >= '0' && btnGrid[i].charAt(0) <= '9') {
+            if (isDigit(btnGrid[i])) 
+                calBtn.addEventListener('click', () => setCurNum(btnGrid[i]));
+            else if (isOperator(btnGrid[i]))
                 calBtn.addEventListener('click', () => {
-                    if (operator.length > 0 && curValues.length === 0) {
-                        curValues.push(curValue);
-                        curValue = btnGrid[i];
-                    }
-                    else if (startOver === true || (curValue.length === 1 && 
-                             curValue.charAt(0) === '0')) {
-                                 startOver = false;
-                                 curValue = btnGrid[i];
-                             }
-                    else 
-                        curValue = curValue.concat(btnGrid[i]);
-                    renderDisplay();
+                    if (op.length !== 0) operate()
+                    op = btnGrid[i];
                 });
-            } else if (btnGrid[i].charAt(0) === '+') {
-                calBtn.addEventListener('click', add);
+            else if (isEquals(btnGrid[i]))
                 calBtn.addEventListener('click', () => {
-                    operator = btnGrid[i];
+                    equals = true;
+                    operate();
                 });
-            } else if (btnGrid[i].charAt(0) === '-') {
-                calBtn.addEventListener('click', subtract);
-                calBtn.addEventListener('click', () => {
-                    operator = btnGrid[i];
-                });
-            } else if (btnGrid[i].charAt(0) === '*') {
-                calBtn.addEventListener('click', multiply);
-                calBtn.addEventListener('click', () => {
-                    operator = btnGrid[i];
-                });
-            } else if (btnGrid[i].charAt(0) === '/') {
-                calBtn.addEventListener('click', divide);
-                calBtn.addEventListener('click', () => {
-                    operator = btnGrid[i];
-                });
-            } else if (btnGrid[i] === 'AC') calBtn.addEventListener('click', clear);
-              else if (btnGrid[i].charAt(0)) calBtn.addEventListener('click', operate)
-
-            calculatorGrid.appendChild(calBtn);
+            else
+                calBtn.addEventListener('click', miscBtnFunc[miscBtnIndex++]);
+            
+            calGrid.appendChild(calBtn);
         }
     }
 
-    function add () {
-        if (operator.length === 0 || curValues.length === 0) return;
-        if (equals === true) operator = emptyString; 
-
-        let num1 = parseInt(curValues.pop());
-        let num2 = parseInt(curValue);
-
-
-        curValue = (num1 + num2).toString();
+    // Set Functions
+    function setPoint() {
+        if (isDecimal(curNum) || getLastChar() === decimalPoint) 
+            return;
+        curNum = curNum.concat(decimalPoint);
         renderDisplay();
     }
 
-    function subtract(){
-        if (operator.length === 0 || curValues.length === 0) return;
-        if (equals === true) operator = emptyString; 
-
-        let num1 = parseInt(curValues.pop());
-        let num2 = parseInt(curValue);
-
-        curValue = (num1 - num2).toString();
+    function setNeg() {
+        if (curNum === zeroDigit || curNum.length === 0)
+            return;
+        else if (getFirstChar() !== negSign) 
+            curNum = negSign.concat(curNum);
+        else 
+            curNum = curNum.substring(1);
         renderDisplay();
     }
 
-    function multiply() {
-        if (operator.length === 0 || curValues.length === 0) return;
-        if (equals === true) operator = emptyString; 
-
-        let num1 = parseInt(curValues.pop());
-        let num2 = parseInt(curValue);
-
-
-        curValue = (num1 * num2).toString();
+    function setCurNum(curDigit) {
+        if (op.length !== 0 && prevNum.length === 0) {
+            prevNum = curNum;
+            curNum = curDigit;
+        }
+        else if (startNewNum || (curNum.length === 1 && 
+                 getFirstChar() === zeroDigit)) {
+            if (startNewNum) startNewNum = false;
+            curNum = curDigit;
+        }
+        else
+            curNum = curNum.concat(curDigit);
         renderDisplay();
     }
 
-    function divide() {
-        if (operator.length === 0 || curValues.length === 0) return;
-        if (equals === true) operator = emptyString; 
-
-        let num1 = parseInt(curValues.pop());
-        let num2 = parseInt(curValue);
-
-        console.log(num1);
-        console.log(num2);
-
-        if (num2 === 0) curValue = divideByZero;
-        else curValue = (num1 / num2).toString();
-        renderDisplay();
+    // Boolean Functions
+    function isDigit(digit) {
+        return digit >= '0' && digit <= '9';
     }
 
+    function isOperator(op) {
+        return op === '+' || op === '-' || op === '*' || op === '/';
+    }
+
+    function isEquals(eq){
+        return eq === '=';
+    }
+
+    function isDecimal(num) {
+        const decIndex = num.indexOf(decimalPoint);
+        return decIndex >= 0 && decIndex !== num.length - 1 ? true : false;
+    }
+
+    // Get Functions
+    function getFirstChar() {
+        return curNum.charAt(0);
+    }
+
+    function getLastChar() {
+        return curNum.charAt(curNum.length - 1);
+    }
+
+    // Parse functions
+    function parseNumber(numStr) {
+        return isDecimal(numStr) ? parseFloat(numStr) : parseInt(numStr);
+    }
+
+    // Calculator functions
+    function add (num1, num2) {
+        curNum = (num1 + num2).toString()
+    }
+
+    function subtract(num1, num2) {
+        curNum = (num1 - num2).toString()
+    }
+
+    function multiply(num1, num2) {
+        curNum = (num1 * num2).toString()
+    }
+
+    function divide(num1, num2) {
+        if (num2 === 0)
+            curNum = divByZeroMsg;
+        else
+            curNum = (num1 / num2).toString()
+    }
+
+    function percentage() {
+        curNum = (parseNumber(curNum) / percent).toString();
+        renderDisplay();
+    }
+    
     function operate() {
-        if (operator.length === 0) return;
-        equals = true;
-        switch (operator) {
+        const num1 = parseNumber(prevNum);
+        const num2 = parseNumber(curNum);
+        switch (op) {
             case '+':
-                add();
+                add(num1, num2);
                 break;
             case '-':
-                subtract();
+                subtract(num1, num2);
                 break;
             case '*':
-                multiply();
+                multiply(num1, num2);
                 break;
             case '/':
-                divide();
+                divide(num1, num2);
                 break;
         }
-        startOver = true;
-        equals = false;
+        renderDisplay();
+        startNewNum = true;
+        prevNum = emptyString;
+        if (equals === true) {
+            op = emptyString;
+            equals = false;
+        }
     }
 
-    function clear() {
-        if (curValues.length > 0) curValues.splice(0, curValues.length);
-        curValue = zeroDigit;
+    // Delete functions 
+    function clearAll() {
+        prevNum = emptyString;
+        curNum = zeroDigit;
         renderDisplay();
     }
 
-    // Initializing Calculator
+    function clearEntry() {
+        if (curNum.length === 1) 
+            curNum = zeroDigit;
+        else 
+            curNum = curNum.substring(0, curNum.length - 1);
+        renderDisplay();
+    }
+
+    // Initialize Calculator
     renderCal();
-});
+})
