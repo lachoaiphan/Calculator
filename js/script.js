@@ -177,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearAll() {
         prevNum = emptyString;
         curNum = zeroDigit;
+        op = emptyString;
         renderDisplay();
     }
 
