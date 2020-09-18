@@ -5,12 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyString = '';
     const zeroDigit = '0'; 
     const percent = 100;
+    const maxNumSize = 9;
     let calGrid = document.querySelector('.cal-grid');
     let display = document.querySelector('.display');
     let prevNum = emptyString;
     let curNum = zeroDigit;
     let op = emptyString;
-    let equals = false;
     let startNewNum = false;
 
     // Render Functions
@@ -25,11 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderGrid() {
-        const btnGrid = ['AC', 'C', '%', '/',
-                         '9', '8', '7', '*',
-                         '6', '5', '4', '-',
-                         '3', '2', '1', '+',
-                         '0', '.', '+/-', '='];
+        const btnGrid = ['AC', 'C', '%', '/', '9', 
+                         '8',  '7', '*', '6', '5', 
+                         '4',  '-', '3', '2', '1', 
+                         '+', '0', '.', '+/-', '='];
         const miscBtnFunc = [clearAll, clearEntry, percentage, 
                              setPoint, setNeg];
         let miscBtnIndex = 0;
@@ -42,15 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 calBtn.addEventListener('click', () => setCurNum(btnGrid[i]));
             else if (isOperator(btnGrid[i]))
                 calBtn.addEventListener('click', () => {
-                    if (op.length !== 0) operate()
+                    if (op.length !== 0) operate(false)
                     op = btnGrid[i];
                 });
             else if (isEquals(btnGrid[i]))
-                calBtn.addEventListener('click', () => {
-                    equals = true;
-                    operate();
-                    equals = false;
-                });
+                calBtn.addEventListener('click', () => operate(true));
             else
                 calBtn.addEventListener('click', miscBtnFunc[miscBtnIndex++]);
             
@@ -80,7 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (op.length !== 0 && prevNum.length === 0) {
             prevNum = curNum;
             curNum = curDigit;
-        }
+            startNewNum = false;
+        } 
+        else if (curNum.length >= maxNumSize) 
+            return;
         else if (startNewNum || (curNum.length === 1 && 
                  getFirstChar() === zeroDigit)) {
             if (startNewNum) startNewNum = false;
@@ -89,6 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
         else
             curNum = curNum.concat(curDigit);
         renderDisplay();
+    }
+
+    function setPrecision(num) {
+        numStr = num.toString();
+        return numStr.length < maxNumSize ? numStr : num.toPrecision(maxNumSize);
     }
 
     // Boolean Functions
@@ -118,37 +121,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return curNum.charAt(curNum.length - 1);
     }
 
-    // Parse functions
+    // Parse function
     function parseNumber(numStr) {
         return isDecimal(numStr) ? parseFloat(numStr) : parseInt(numStr);
     }
 
     // Calculator functions
     function add (num1, num2) {
-        curNum = (num1 + num2).toString()
+        curNum = setPrecision((num1 + num2))
     }
 
     function subtract(num1, num2) {
-        curNum = (num1 - num2).toString()
+        curNum = setPrecision((num1 - num2))
     }
 
     function multiply(num1, num2) {
-        curNum = (num1 * num2).toString()
+        curNum = setPrecision((num1 * num2))
     }
 
     function divide(num1, num2) {
         if (num2 === 0)
             curNum = divByZeroMsg;
         else
-            curNum = (num1 / num2).toString()
+            curNum = setPrecision((num1 / num2))
     }
 
     function percentage() {
-        curNum = (parseNumber(curNum) / percent).toString();
+        curNum = setPrecision(parseNumber(curNum) / percent)
         renderDisplay();
     }
     
-    function operate() {
+    function operate(equals) {
         if (prevNum === emptyString)
             return;
         const num1 = parseNumber(prevNum);
@@ -179,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         prevNum = emptyString;
         curNum = zeroDigit;
         op = emptyString;
+        startNewNum = false;
         renderDisplay();
     }
 
